@@ -113,9 +113,9 @@ def main_screen():
             position_str = position.stdout[:-1].decode("utf-8")
             length_str = length.stdout[:-1].decode("utf-8")
 
-            box1.addstr(1, 2, " " * (half_cols - 10), curses.A_NORMAL)
-            box1.addstr(2, 2, " " * (half_cols - 10), curses.A_NORMAL)
-            box1.addstr(3, 2, " " * (half_cols - 10), curses.A_NORMAL)
+            box1.addstr(1, 2, " " * (half_cols - 2), curses.A_NORMAL)
+            box1.addstr(2, 2, " " * (half_cols - 2), curses.A_NORMAL)
+            box1.addstr(3, 2, " " * (half_cols - 2), curses.A_NORMAL)
 
             box1.addnstr(1, 2, "Title:  ", half_cols - 10, curses.color_pair(218))
             box1.addnstr(1, 10, old_title_scrolled, half_cols - 11)
