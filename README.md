@@ -20,3 +20,4 @@ python3 main.py
 - buttons for playback control
 - resizing?
 - better album art scaling
+- colors from album art
