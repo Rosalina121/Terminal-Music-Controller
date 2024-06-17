@@ -99,11 +99,11 @@ def main_screen():
                 old_album_scrolled = album.stdout[:-1].decode("utf-8") + " "
                 old_artist_scrolled = artist.stdout[:-1].decode("utf-8") + " "
 
-            if len(old_title_scrolled) > half_cols - 10:
+            if len(old_title_scrolled) > half_cols - 11:
                 old_title_scrolled = scroll_string(old_title_scrolled)
-            if len(old_album_scrolled) > half_cols - 10:
+            if len(old_album_scrolled) > half_cols - 11:
                 old_album_scrolled = scroll_string(old_album_scrolled)
-            if len(old_artist_scrolled) > half_cols - 10:
+            if len(old_artist_scrolled) > half_cols - 11:
                 old_artist_scrolled = scroll_string(old_artist_scrolled)
             position = subprocess.run(
                 'playerctl position --format "{{ duration(position) }}"',
@@ -116,15 +116,15 @@ def main_screen():
             box1.addstr(1, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(2, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(3, 2, " " * (half_cols - 10), curses.A_NORMAL)
-            box1.addstr(4, 2, " " * (half_cols - 2), curses.A_NORMAL)
+            
             box1.addnstr(1, 2, "Title:  ", half_cols - 10, curses.color_pair(218))
-            box1.addnstr(1, 10, old_title_scrolled, half_cols - 10)
+            box1.addnstr(1, 10, old_title_scrolled, half_cols - 11)
 
             box1.addnstr(2, 2, "Album:  ", half_cols - 10, curses.color_pair(118))
-            box1.addnstr(2, 10, old_album_scrolled, half_cols - 10)
+            box1.addnstr(2, 10, old_album_scrolled, half_cols - 11)
 
             box1.addnstr(3, 2, "Artist: ", half_cols - 10, curses.color_pair(220))
-            box1.addnstr(3, 10, old_artist_scrolled, half_cols - 10)
+            box1.addnstr(3, 10, old_artist_scrolled, half_cols - 11)
 
 
             
