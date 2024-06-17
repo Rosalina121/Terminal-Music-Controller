@@ -23,11 +23,16 @@ screen.border(0)
 screen.nodelay(1)
 
 curses.start_color()
-curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+curses.use_default_colors()
+for i in range(0, curses.COLORS):
+    curses.init_pair(i + 1, i, -1)
 
 def scroll_string(string):
     new_string = string[1:] + string[0]
     return new_string
+
+def get_color_from_percentage(base, percentage):
+    return base + int(percentage / 20) % 6
 
 
 def main_screen():
@@ -112,18 +117,15 @@ def main_screen():
             box1.addstr(2, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(3, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(4, 2, " " * (half_cols - 2), curses.A_NORMAL)
-            box1.addnstr(1, 2, "Title:  ", half_cols - 10, curses.color_pair(1))
+            box1.addnstr(1, 2, "Title:  ", half_cols - 10, curses.color_pair(218))
             box1.addnstr(1, 10, old_title_scrolled, half_cols - 10)
 
-            box1.addnstr(2, 2, "Album:  ", half_cols - 10)
+            box1.addnstr(2, 2, "Album:  ", half_cols - 10, curses.color_pair(118))
             box1.addnstr(2, 10, old_album_scrolled, half_cols - 10)
 
-            box1.addnstr(3, 2, "Artist: ", half_cols - 10)
-            box1.addnstr(3, 2, old_artist_scrolled, half_cols - 10)
+            box1.addnstr(3, 2, "Artist: ", half_cols - 10, curses.color_pair(220))
+            box1.addnstr(3, 10, old_artist_scrolled, half_cols - 10)
 
-            box1.addstr(
-                5, 2, position_str + " "*(half_cols - 3 - len(position_str) - len(length_str)) + length_str, half_cols - 2
-            )
 
             
             # progress bar
@@ -139,6 +141,9 @@ def main_screen():
             progress_bar = progress_bar[:int(percentage / 100 * (half_cols - 3))] + "⬤" + progress_bar[int(percentage / 100 * (half_cols - 3)) + 1:]
             box1.addstr(6, 2, progress_bar, curses.A_NORMAL)
 
+            box1.addstr(5, 2, position_str, curses.color_pair(get_color_from_percentage(215, percentage)))
+            box1.addstr(5, half_cols - 1 - len(length_str), length_str, curses.color_pair(131))
+
             screen.refresh()
             screen.getch()
             time.sleep(1)
@@ -147,3 +152,6 @@ def main_screen():
 
 
 main_screen()
+
+
+
