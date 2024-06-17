@@ -116,7 +116,7 @@ def main_screen():
             box1.addstr(1, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(2, 2, " " * (half_cols - 10), curses.A_NORMAL)
             box1.addstr(3, 2, " " * (half_cols - 10), curses.A_NORMAL)
-            
+
             box1.addnstr(1, 2, "Title:  ", half_cols - 10, curses.color_pair(218))
             box1.addnstr(1, 10, old_title_scrolled, half_cols - 11)
 
@@ -137,12 +137,12 @@ def main_screen():
 
             percentage = cur_pos / cur_length * 100
             percentage = int(percentage)
-            progress_bar = (half_cols - 3) * "-"
-            progress_bar = progress_bar[:int(percentage / 100 * (half_cols - 3))] + "⬤" + progress_bar[int(percentage / 100 * (half_cols - 3)) + 1:]
-            box1.addstr(6, 2, progress_bar, curses.A_NORMAL)
+            progress_bar = (half_cols - 4) * "-"
+            progress_bar = progress_bar[:int(percentage / 100 * (half_cols - 4))] + "⬤" + progress_bar[int(percentage / 100 * (half_cols - 4)) + 1:]
+            box1.addnstr(6, 2, progress_bar, half_cols - 4)
 
             box1.addstr(5, 2, position_str, curses.color_pair(get_color_from_percentage(215, percentage)))
-            box1.addstr(5, half_cols - 1 - len(length_str), length_str, curses.color_pair(131))
+            box1.addstr(5, half_cols - 2 - len(length_str), length_str, curses.color_pair(131))
 
             screen.refresh()
             screen.getch()
