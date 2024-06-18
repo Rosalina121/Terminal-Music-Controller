@@ -78,7 +78,7 @@ def draw_progress_bar(box, pos_str, length_str, max_x, base_rgb, target_rgb):
     box.addnstr(6, 2, progress_bar, max_x - 4)
     progress_bar_length = int(percentage / 100 * (max_x - 4))
     if progress_bar_length != 0:
-        box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(3))
+        box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(1))
 
     box.addstr(5, 2, pos_str, curses.color_pair(1))
 
