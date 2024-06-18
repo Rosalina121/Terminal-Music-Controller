@@ -2,6 +2,9 @@
 
 ~~Control~~ Monitor your music from the terminal, with curses!
 ![Example view](example.png)
+![Example view](example2.png)
+![Example view](example3.png)
+
 ## Requirements
 - installed `playerctl`
 - Python 3 (any version compatible with `curses`)
@@ -20,6 +23,7 @@ python3 main.py
 - Album art!
 - moving progress bar
 - colors taken from the album art
+- colors of active position (current time) and progress bar blend seamlessly to colors of total time
 ## Roadmap
 - buttons for playback control
 - resizing?
