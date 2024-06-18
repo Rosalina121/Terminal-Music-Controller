@@ -13,12 +13,10 @@
 
 
 import curses
-import textwrap
 import subprocess
 import time
 from urllib.request import urlopen
 from colorthief import ColorThief
-import sys
 import io
 
 
@@ -162,7 +160,7 @@ def main_screen():
             curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
             box1.addstr(lines - 2, 2, "♫ Unknown", curses.color_pair(1))
         # TODO: Add more
-        
+
         # image art prep
         box2.box()
         if half_cols > lines * 2:

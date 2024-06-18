@@ -10,7 +10,8 @@
 - Python 3 (any version compatible with `curses`)
   - `colorthief 0.2.1`
   - `pillow 10.3.0`
-- Kitty for terminal (or any other that supports images, `kitty icat` is used for album art here though)
+- Terminal that supports images, `kitty icat` is used for album art here though
+  - Tested with `Konsole` and `Kitty`. Works best with `Kitty`, `Konsole` needs some work...
 - Nerf Font (optional, used only for player logos)
 
 ## Usage
