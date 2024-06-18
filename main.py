@@ -65,7 +65,7 @@ screen.nodelay(1)
 init_color()
 
 
-def draw_progress_bar(box, pos_str, length_str, max_x):
+def draw_progress_bar(box, pos_str, length_str, max_x, base_rgb, target_rgb):
     cur_pos = sum(int(x) * 60**i for i, x in enumerate(pos_str.split(":")[::-1]))
     cur_length = sum(int(x) * 60**i for i, x in enumerate(length_str.split(":")[::-1]))
 
@@ -83,7 +83,7 @@ def draw_progress_bar(box, pos_str, length_str, max_x):
 
     box.addstr(5, max_x - 2 - len(length_str), length_str, curses.color_pair(3))
 
-    blend_and_init_color((245, 169, 184), (91, 206, 250), percentage)
+    blend_and_init_color(base_rgb, target_rgb, percentage)
 
 
 def blend_and_init_color(base, target, percentage):
@@ -105,6 +105,7 @@ def set_colors_from_album_art(cover_art_url_url):
     for color in palette:
         curses.init_color(c, int(color[0]/.255), int(color[1]/.255), int(color[2]/.255))
         c += 1
+    return palette
 
 def main_screen():
     try:
@@ -132,6 +133,8 @@ def main_screen():
         old_album_scrolled = ""
         old_artist_scrolled = ""
 
+        # palette
+        palette = []
         while True:
             title = subprocess.run(
                 "playerctl metadata title", shell=True, stdout=subprocess.PIPE
@@ -144,7 +147,7 @@ def main_screen():
                     stdout=subprocess.PIPE,
                 )
                 cover_art_url_url = cover_art_url.stdout[:-1].decode("utf-8")
-                set_colors_from_album_art(cover_art_url_url)
+                palette = set_colors_from_album_art(cover_art_url_url)
                 subprocess.run(["/home/rosalina/.local/bin/kitty", "icat", "--clear"])
                 subprocess.run(
                     [
@@ -202,8 +205,8 @@ def main_screen():
 
             box1.addnstr(3, 2, "Artist: ", half_cols - 10, curses.color_pair(2))
             box1.addnstr(3, 10, old_artist_scrolled, half_cols - 11)
-
-            draw_progress_bar(box1, position_str, length_str, half_cols)
+            if palette:
+                draw_progress_bar(box1, position_str, length_str, half_cols, palette[1], palette[2])
 
             screen.refresh()
             screen.getch()
