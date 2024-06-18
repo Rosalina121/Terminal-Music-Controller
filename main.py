@@ -125,7 +125,10 @@ def main_screen():
 
         # image art shit
         box2.box()
-        image_size_and_pos = f"{half_cols-2}x{half_cols-2}@{half_cols+1}x1"
+        if half_cols > lines*2:
+            image_size_and_pos = f"{2*lines-2}x{2*lines-2}@{half_cols+1}x1"
+        else:
+            image_size_and_pos = f"{half_cols-2}x{half_cols-2}@{half_cols+1}x1"
 
         # metdata
         old_title = ""
@@ -141,6 +144,7 @@ def main_screen():
             )
             if title.stdout[:-1].decode("utf-8") != old_title:
                 old_title = title.stdout[:-1].decode("utf-8")
+
                 cover_art_url = subprocess.run(
                     "playerctl metadata mpris:artUrl",
                     shell=True,
@@ -148,6 +152,7 @@ def main_screen():
                 )
                 cover_art_url_url = cover_art_url.stdout[:-1].decode("utf-8")
                 palette = set_colors_from_album_art(cover_art_url_url)
+
                 subprocess.run(["/home/rosalina/.local/bin/kitty", "icat", "--clear"])
                 subprocess.run(
                     [
@@ -160,8 +165,6 @@ def main_screen():
                     ],
                     shell=False,
                 )
-
-
 
                 album = subprocess.run(
                     "playerctl metadata album", shell=True, stdout=subprocess.PIPE
