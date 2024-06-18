@@ -26,7 +26,7 @@ python3 main.py
 - colors of active position (current time) and progress bar blend seamlessly to colors of total time
 ## Roadmap
 - buttons for playback control
-- resizing?
+- ~~resizing?~~ ✅
 - ~~better album art scaling~~ ✅
 - ~~colors from album art~~ ✅
 - detect player and change the text accordingly
