@@ -74,11 +74,12 @@ def draw_progress_bar(box, pos_str, length_str, max_x, base_rgb, target_rgb):
     percentage = cur_pos / cur_length * 100
     percentage = int(percentage)
 
-    progress_bar = (max_x - 4) * "━"
-    box.addnstr(6, 2, progress_bar, max_x - 4)
+    progress_bar = (max_x - 4) * "┅"
+    progress_bar_filled = (max_x - 4) * "━"
+    box.addnstr(6, 2, progress_bar, max_x - 4, curses.color_pair(3))
     progress_bar_length = int(percentage / 100 * (max_x - 4))
     if progress_bar_length != 0:
-        box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(1))
+        box.addnstr(6, 2, progress_bar_filled, progress_bar_length, curses.color_pair(1))
 
     box.addstr(5, 2, pos_str, curses.color_pair(1))
 
@@ -97,9 +98,9 @@ def blend_and_init_color(base, target, percentage):
 
     curses.init_color(
         1,
-        min(int(r / 0.255), 1000),
-        min(int(g / 0.255), 1000),
-        min(int(b / 0.255), 1000),
+        min(max(int(r / 0.255), 0), 1000),
+        min(max(int(g / 0.255), 0), 1000),
+        min(max(int(b / 0.255), 0), 1000),
     )
 
 
@@ -108,7 +109,7 @@ def set_colors_from_album_art(cover_art_url_url):
     img = io.BytesIO(fd.read())
     color_thief = ColorThief(img)
 
-    palette = color_thief.get_palette(quality=1, color_count=10)
+    palette = color_thief.get_palette(quality=1, color_count=6)
     brightest_colors = sorted(palette, key=lambda x: x[0] + x[1] + x[2])[-3:]
     c = 1
     for color in brightest_colors:
@@ -209,6 +210,9 @@ def main_screen():
                 old_title_scrolled = title.stdout[:-1].decode("utf-8") + "    "
                 old_album_scrolled = album.stdout[:-1].decode("utf-8") + "    "
                 old_artist_scrolled = artist.stdout[:-1].decode("utf-8") + "    "
+                
+                # clean time, usually not needed, but some songs are longer than 10 mins ;)
+                box1.addstr(5, 2, " " * (safe_line_width - 4), curses.A_NORMAL)
 
             if len(old_title_scrolled) > max_text_len:
                 old_title_scrolled = scroll_string(old_title_scrolled)
