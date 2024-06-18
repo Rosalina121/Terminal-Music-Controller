@@ -16,6 +16,10 @@ import curses
 import textwrap
 import subprocess
 import time
+from urllib.request import urlopen
+from colorthief import ColorThief
+import sys
+import io
 
 
 def init_color():
@@ -67,11 +71,12 @@ def draw_progress_bar(box, pos_str, length_str, max_x):
 
     percentage = cur_pos / cur_length * 100
     percentage = int(percentage)
-    
+
     progress_bar = (max_x - 4) * "━"
     box.addnstr(6, 2, progress_bar, max_x - 4)
     progress_bar_length = int(percentage / 100 * (max_x - 4))
-    box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(3))
+    if progress_bar_length != 0:
+        box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(3))
     
 
     box.addstr(5, 2, pos_str, curses.color_pair(1))
@@ -89,8 +94,17 @@ def blend_and_init_color(base, target, percentage):
     g = int(g_base + percentage / 100 * (g_target - g_base))
     b = int(b_base + percentage / 100 * (b_target - b_base))
 
-    curses.init_color(1, int(r / 0.255), int(g / 0.255), int(b / 0.255))
+    curses.init_color(1, min(int(r / 0.255), 1000), min(int(g / 0.255), 1000), min(int(b / 0.255), 1000))
 
+def set_colors_from_album_art(cover_art_url_url):
+    fd = urlopen(cover_art_url_url)
+    img = io.BytesIO(fd.read())
+    color_thief = ColorThief(img)
+    palette = color_thief.get_palette(quality=1, color_count=3)
+    c = 1
+    for color in palette:
+        curses.init_color(c, int(color[0]/.255), int(color[1]/.255), int(color[2]/.255))
+        c += 1
 
 def main_screen():
     try:
@@ -129,6 +143,8 @@ def main_screen():
                     shell=True,
                     stdout=subprocess.PIPE,
                 )
+                cover_art_url_url = cover_art_url.stdout[:-1].decode("utf-8")
+                set_colors_from_album_art(cover_art_url_url)
                 subprocess.run(["/home/rosalina/.local/bin/kitty", "icat", "--clear"])
                 subprocess.run(
                     [
@@ -141,6 +157,8 @@ def main_screen():
                     ],
                     shell=False,
                 )
+
+
 
                 album = subprocess.run(
                     "playerctl metadata album", shell=True, stdout=subprocess.PIPE
