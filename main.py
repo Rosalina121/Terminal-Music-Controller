@@ -67,19 +67,18 @@ def draw_progress_bar(box, pos_str, length_str, max_x):
 
     percentage = cur_pos / cur_length * 100
     percentage = int(percentage)
+    
     progress_bar = (max_x - 4) * "━"
-    progress_bar = (
-        progress_bar[: int(percentage / 100 * (max_x - 4))]
-        + "○"
-        + progress_bar[int(percentage / 100 * (max_x - 4)) + 1 :]
-    )
     box.addnstr(6, 2, progress_bar, max_x - 4)
+    progress_bar_length = int(percentage / 100 * (max_x - 4))
+    box.addnstr(6, 2, progress_bar, progress_bar_length, curses.color_pair(3))
+    
 
     box.addstr(5, 2, pos_str, curses.color_pair(1))
 
     box.addstr(5, max_x - 2 - len(length_str), length_str, curses.color_pair(3))
 
-    blend_and_init_color((255, 255, 255), (255, 0, 0), percentage)
+    blend_and_init_color((245, 169, 184), (91, 206, 250), percentage)
 
 
 def blend_and_init_color(base, target, percentage):
