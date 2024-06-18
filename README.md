@@ -18,8 +18,9 @@ python3 main.py
 - scrollable text if longer than window
 - Album art!
 - moving progress bar
+- colors taken from the album art
 ## Roadmap
 - buttons for playback control
 - resizing?
 - better album art scaling
-- colors from album art
+- ~~colors from album art~~
