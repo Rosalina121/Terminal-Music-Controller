@@ -11,7 +11,7 @@
   - `colorthief 0.2.1`
   - `pillow 10.3.0`
 - Kitty for terminal (or any other that supports images, `kitty icat` is used for album art here though)
-- Nerf Font (optional)
+- Nerf Font (optional, used only for player logos)
 
 ## Usage
 Install reqs and just run:
@@ -29,6 +29,6 @@ python3 main.py
 - ~~resizing?~~ ✅
 - ~~better album art scaling~~ ✅
 - ~~colors from album art~~ ✅
-- detect player and change the text accordingly
-  - for now AM is hardcoded, as that's what I use
+- ~~detect player and change the text accordingly~~ 🤏
+  - Apple Music (Cider) and VLC are coded, rest... TODO
   - If you use Spotify or Youtube Music... what are you doing here? There is `spotify-tui` and `ytermusic`!

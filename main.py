@@ -148,10 +148,21 @@ def main_screen():
         # Debug:
         # box1.addstr(8, 2, f"Lines: {lines}, Columns: {cols}, 2xLines: {2*lines}, half_cols: {half_cols}", curses.color_pair(1))
         
-        # Apple Music logo
-        curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
-        box1.addstr(lines - 2, 2, "\ue711 Music", curses.color_pair(4))
-
+        # Media logos
+        current_media_app = subprocess.run(
+            "playerctl -l", shell=True, stdout=subprocess.PIPE
+        )
+        if "cider" in current_media_app.stdout[:-1].decode("utf-8"):
+            curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
+            box1.addstr(lines - 2, 2, "\ue711 Music", curses.color_pair(4))
+        elif "vlc" in current_media_app.stdout[:-1].decode("utf-8"):
+            curses.init_color(4, int(232/.255), int(94/.255), int(0/.255))
+            box1.addstr(lines - 2, 2, "󰕼 VLC", curses.color_pair(4))
+        else:
+            curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
+            box1.addstr(lines - 2, 2, "♫ Unknown", curses.color_pair(1))
+        # TODO: Add more
+        
         # image art prep
         box2.box()
         if half_cols > lines * 2:
