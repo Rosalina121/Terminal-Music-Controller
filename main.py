@@ -32,20 +32,16 @@ def init_color():
 
     curses.start_color()
 
-    # old colors
-    # curses.init_color(1, 0, 0, 0)  # white for progress
-    # curses.init_color(2, int(245 / 0.255), int(169 / 0.255), int(184 / 0.255))  # pink
-    # curses.init_color(3, int(91 / 0.255), int(206 / 0.255), int(250 / 0.255))  # blue
-
+    # Primary colors
     curses.init_pair(1, 1, 0) 
     curses.init_pair(2, 2, 0)  
     curses.init_pair(3, 3, 0)  
-    curses.init_pair(4, 4, 0)
-
-    # # set default colors
-    # curses.use_default_colors()
-    # for i in range(0, curses.COLORS):
-    #     curses.init_pair(i + 1, i, -1)
+    # Inverted
+    curses.init_pair(4, 0, 1) 
+    curses.init_pair(5, 0, 2)  
+    curses.init_pair(6, 0, 3)  
+    # Special pair for player color
+    curses.init_pair(99, 4, 0)  
 
 
 def scroll_string(string):
@@ -57,10 +53,16 @@ def get_color_from_percentage(base, percentage):
     return base + int(percentage / 20) % 6
 
 
+# init curses
 screen = curses.initscr()
 screen.immedok(True)
-# screen.border(0)
 screen.nodelay(1)
+screen.keypad(1)
+
+curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+curses.flushinp()
+curses.noecho()
+curses.curs_set(0)  
 
 init_color()
 
@@ -152,10 +154,10 @@ def main_screen():
         )
         if "cider" in current_media_app.stdout[:-1].decode("utf-8"):
             curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
-            box1.addstr(lines - 2, 2, "\ue711 Music", curses.color_pair(4))
+            box1.addstr(lines - 2, 2, "\ue711 Music", curses.color_pair(99))
         elif "vlc" in current_media_app.stdout[:-1].decode("utf-8"):
             curses.init_color(4, int(232/.255), int(94/.255), int(0/.255))
-            box1.addstr(lines - 2, 2, "󰕼 VLC", curses.color_pair(4))
+            box1.addstr(lines - 2, 2, "󰕼 VLC", curses.color_pair(99))
         else:
             curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
             box1.addstr(lines - 2, 2, "♫ Unknown", curses.color_pair(1))
@@ -222,18 +224,25 @@ def main_screen():
                 
                 # clean time, usually not needed, but some songs are longer than 10 mins ;)
                 box1.addstr(5, 2, " " * (safe_line_width - 4), curses.A_NORMAL)
+
             # check if playing
             status = subprocess.run(
                 "playerctl status", shell=True, stdout=subprocess.PIPE
             )
 
+            # play/pause button, and scrolling text
+            box1.addstr(7, 2, "P", curses.color_pair(2) | curses.A_UNDERLINE)
             if status.stdout[:-1].decode("utf-8") == "Playing":
+                box1.addstr(7, 3, "ause", curses.color_pair(2))
+
                 if len(old_title_scrolled) > max_text_len:
                     old_title_scrolled = scroll_string(old_title_scrolled)
                 if len(old_album_scrolled) > max_text_len:
                     old_album_scrolled = scroll_string(old_album_scrolled)
                 if len(old_artist_scrolled) > max_text_len:
                     old_artist_scrolled = scroll_string(old_artist_scrolled)
+            else:
+                box1.addstr(7, 3, "lay ", curses.color_pair(2))
             
             position = subprocess.run(
                 'playerctl position --format "{{ duration(position) }}"',
@@ -255,18 +264,51 @@ def main_screen():
 
             box1.addnstr(3, 2, "Artist: ", max_text_len, curses.color_pair(2))
             box1.addnstr(3, 10, old_artist_scrolled, max_text_len)
+            
             if palette:
                 draw_progress_bar(
                     box1, position_str, length_str, safe_line_width, palette[0], palette[2]
                 )
-            box1.border(0)
-            box2.border(0)
-            screen.refresh()
+
+            # Next/Previous
+            box1.addstr(7, 8, "N", curses.color_pair(3) | curses.A_UNDERLINE)
+            box1.addstr(7, 9, "ext", curses.color_pair(3))
+            box1.addstr(7, 13, "P", curses.color_pair(3))
+            box1.addstr(7, 14, "r", curses.color_pair(3) | curses.A_UNDERLINE)
+            box1.addstr(7, 15, "evious", curses.color_pair(3))
+            
+
             key = screen.getch()
-            if (key == curses.KEY_RESIZE):
+            if key == curses.KEY_RESIZE:
                 curses.endwin()
                 main_screen()
-            time.sleep(1)
+            if key == ord("q"):
+                curses.endwin()
+                quit()
+            
+            if key == curses.KEY_MOUSE:
+                _, x, y, _, _ = curses.getmouse()
+                # Play/Pause
+                if y == 7 and x >= 2 and x <= 6:
+                    subprocess.run(["playerctl", "play-pause"])
+                # Next
+                if y == 7 and x >= 8 and x <= 11:
+                    subprocess.run(["playerctl", "next"])
+                # Previous
+                if y == 7 and x >= 13 and x <= 20:
+                    subprocess.run(["playerctl", "previous"])
+            if key == ord("p"):
+                subprocess.run(["playerctl", "play-pause"])
+            if key == ord("n"):
+                subprocess.run(["playerctl", "next"])
+            if key == ord("r"):
+                subprocess.run(["playerctl", "previous"])
+
+            box1.border(0)
+            box2.border(0)
+            
+            screen.refresh()
+            time.sleep(0.5)
     finally:
         curses.endwin()
 

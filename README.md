@@ -21,15 +21,21 @@ python3 main.py
 ```
 ## Features
 - scrollable text if longer than window
-- Album art!
+- album art!
 - moving progress bar
 - colors taken from the album art
 - colors of active position (current time) and progress bar blend seamlessly to colors of total time
+- buttons for playback control (+ keyboard keys)
+- *almost* detects current player
+  - Cider and VLC are coded, others WIP
+## Known issues
+- Will crash on start with `ValueError: invalid literal for int() with base 10: ''`
+  - This is happening when more players are active and `playerctl` gets metadata from the wrong one.
+  - May address it in the future, currently I have little knowledge of `playerctl` internals
 ## Roadmap
-- buttons for playback control
+- ~~buttons for playback control~~ ✅
 - ~~resizing?~~ ✅
 - ~~better album art scaling~~ ✅
 - ~~colors from album art~~ ✅
 - ~~detect player and change the text accordingly~~ 🤏
-  - Apple Music (Cider) and VLC are coded, rest... TODO
   - If you use Spotify or Youtube Music... what are you doing here? There is `spotify-tui` and `ytermusic`!
