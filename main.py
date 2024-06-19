@@ -18,6 +18,7 @@ import time
 from urllib.request import urlopen
 from colorthief import ColorThief
 import io
+import re
 
 
 def init_color():
@@ -33,15 +34,15 @@ def init_color():
     curses.start_color()
 
     # Primary colors
-    curses.init_pair(1, 1, 0) 
-    curses.init_pair(2, 2, 0)  
-    curses.init_pair(3, 3, 0)  
+    curses.init_pair(1, 1, 0)
+    curses.init_pair(2, 2, 0)
+    curses.init_pair(3, 3, 0)
     # Inverted
-    curses.init_pair(4, 0, 1) 
-    curses.init_pair(5, 0, 2)  
-    curses.init_pair(6, 0, 3)  
+    curses.init_pair(4, 0, 1)
+    curses.init_pair(5, 0, 2)
+    curses.init_pair(6, 0, 3)
     # Special pair for player color
-    curses.init_pair(99, 4, 0)  
+    curses.init_pair(99, 4, 0)
 
 
 def scroll_string(string):
@@ -62,7 +63,7 @@ screen.keypad(1)
 curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
 curses.flushinp()
 curses.noecho()
-curses.curs_set(0)  
+curses.curs_set(0)
 
 init_color()
 
@@ -79,7 +80,9 @@ def draw_progress_bar(box, pos_str, length_str, max_x, base_rgb, target_rgb):
     box.addnstr(6, 2, progress_bar, max_x - 4, curses.color_pair(3))
     progress_bar_length = int(percentage / 100 * (max_x - 4))
     if progress_bar_length != 0:
-        box.addnstr(6, 2, progress_bar_filled, progress_bar_length, curses.color_pair(1))
+        box.addnstr(
+            6, 2, progress_bar_filled, progress_bar_length, curses.color_pair(1)
+        )
         if progress_bar_length < max_x - 4:
             box.addstr(6, 1 + progress_bar_length, "━", curses.color_pair(2))
 
@@ -88,6 +91,7 @@ def draw_progress_bar(box, pos_str, length_str, max_x, base_rgb, target_rgb):
     box.addstr(5, max_x - 2 - len(length_str), length_str, curses.color_pair(3))
 
     blend_and_init_color(base_rgb, target_rgb, percentage)
+
 
 def blend_and_init_color(base, target, percentage):
     r_base, g_base, b_base = base
@@ -121,6 +125,27 @@ def set_colors_from_album_art(cover_art_url_url):
     return brightest_colors
 
 
+def update_cava_config(palette):
+    f = open("/home/rosalina/.config/cava/config", "w")
+    f.write(
+        """
+[color]
+
+gradient = 1
+gradient_count = 3
+gradient_color_1 = {0}
+gradient_color_2 = {1}
+gradient_color_3 = {2}
+        """.format(
+            "'#{:02x}{:02x}{:02x}'".format(palette[0][0], palette[0][1], palette[0][2]),
+            "'#{:02x}{:02x}{:02x}'".format(palette[1][0], palette[1][1], palette[1][2]),
+            "'#{:02x}{:02x}{:02x}'".format(palette[2][0], palette[2][1], palette[2][2]),
+        )
+    )
+    f.close()
+    subprocess.run(["pkill", "-USR2", "cava"])
+
+
 def main_screen():
     try:
         lines, cols = screen.getmaxyx()
@@ -140,26 +165,24 @@ def main_screen():
 
         max_text_len = safe_line_width - 12
 
-
-
         box1.immedok(True)
         box2.immedok(True)
 
         # Debug:
         # box1.addstr(8, 2, f"Lines: {lines}, Columns: {cols}, 2xLines: {2*lines}, half_cols: {half_cols}", curses.color_pair(1))
-        
+
         # Media logos
         current_media_app = subprocess.run(
             "playerctl -l", shell=True, stdout=subprocess.PIPE
         )
         if "cider" in current_media_app.stdout[:-1].decode("utf-8"):
-            curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
+            curses.init_color(4, int(250 / 0.255), int(45 / 0.255), int(72 / 0.255))
             box1.addstr(lines - 2, 2, "\ue711 Music", curses.color_pair(99))
         elif "vlc" in current_media_app.stdout[:-1].decode("utf-8"):
-            curses.init_color(4, int(232/.255), int(94/.255), int(0/.255))
+            curses.init_color(4, int(232 / 0.255), int(94 / 0.255), int(0 / 0.255))
             box1.addstr(lines - 2, 2, "󰕼 VLC", curses.color_pair(99))
         else:
-            curses.init_color(4, int(250/.255), int(45/.255), int(72/.255))
+            curses.init_color(4, int(250 / 0.255), int(45 / 0.255), int(72 / 0.255))
             box1.addstr(lines - 2, 2, "♫ Unknown", curses.color_pair(1))
         # TODO: Add more
 
@@ -192,6 +215,9 @@ def main_screen():
                 )
                 cover_art_url_url = cover_art_url.stdout[:-1].decode("utf-8")
                 palette = set_colors_from_album_art(cover_art_url_url)
+                
+                # cava
+                update_cava_config(palette)
 
                 subprocess.run(["/home/rosalina/.local/bin/kitty", "icat", "--clear"])
                 subprocess.run(
@@ -221,7 +247,7 @@ def main_screen():
                 old_title_scrolled = title.stdout[:-1].decode("utf-8") + "    "
                 old_album_scrolled = album.stdout[:-1].decode("utf-8") + "    "
                 old_artist_scrolled = artist.stdout[:-1].decode("utf-8") + "    "
-                
+
                 # clean time, usually not needed, but some songs are longer than 10 mins ;)
                 box1.addstr(5, 2, " " * (safe_line_width - 4), curses.A_NORMAL)
 
@@ -243,7 +269,7 @@ def main_screen():
                     old_artist_scrolled = scroll_string(old_artist_scrolled)
             else:
                 box1.addstr(7, 3, "lay ", curses.color_pair(2))
-            
+
             position = subprocess.run(
                 'playerctl position --format "{{ duration(position) }}"',
                 shell=True,
@@ -264,10 +290,15 @@ def main_screen():
 
             box1.addnstr(3, 2, "Artist: ", max_text_len, curses.color_pair(2))
             box1.addnstr(3, 10, old_artist_scrolled, max_text_len)
-            
+
             if palette:
                 draw_progress_bar(
-                    box1, position_str, length_str, safe_line_width, palette[0], palette[2]
+                    box1,
+                    position_str,
+                    length_str,
+                    safe_line_width,
+                    palette[0],
+                    palette[2],
                 )
 
             # Next/Previous
@@ -276,7 +307,6 @@ def main_screen():
             box1.addstr(7, 13, "P", curses.color_pair(3))
             box1.addstr(7, 14, "r", curses.color_pair(3) | curses.A_UNDERLINE)
             box1.addstr(7, 15, "evious", curses.color_pair(3))
-            
 
             key = screen.getch()
             if key == curses.KEY_RESIZE:
@@ -285,7 +315,7 @@ def main_screen():
             if key == ord("q"):
                 curses.endwin()
                 quit()
-            
+
             if key == curses.KEY_MOUSE:
                 _, x, y, _, _ = curses.getmouse()
                 # Play/Pause
@@ -306,7 +336,7 @@ def main_screen():
 
             box1.border(0)
             box2.border(0)
-            
+
             screen.refresh()
             time.sleep(0.5)
     finally:
