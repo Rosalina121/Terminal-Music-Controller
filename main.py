@@ -222,13 +222,19 @@ def main_screen():
                 
                 # clean time, usually not needed, but some songs are longer than 10 mins ;)
                 box1.addstr(5, 2, " " * (safe_line_width - 4), curses.A_NORMAL)
+            # check if playing
+            status = subprocess.run(
+                "playerctl status", shell=True, stdout=subprocess.PIPE
+            )
 
-            if len(old_title_scrolled) > max_text_len:
-                old_title_scrolled = scroll_string(old_title_scrolled)
-            if len(old_album_scrolled) > max_text_len:
-                old_album_scrolled = scroll_string(old_album_scrolled)
-            if len(old_artist_scrolled) > max_text_len:
-                old_artist_scrolled = scroll_string(old_artist_scrolled)
+            if status.stdout[:-1].decode("utf-8") == "Playing":
+                if len(old_title_scrolled) > max_text_len:
+                    old_title_scrolled = scroll_string(old_title_scrolled)
+                if len(old_album_scrolled) > max_text_len:
+                    old_album_scrolled = scroll_string(old_album_scrolled)
+                if len(old_artist_scrolled) > max_text_len:
+                    old_artist_scrolled = scroll_string(old_artist_scrolled)
+            
             position = subprocess.run(
                 'playerctl position --format "{{ duration(position) }}"',
                 shell=True,
