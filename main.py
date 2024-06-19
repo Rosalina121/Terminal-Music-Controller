@@ -59,7 +59,7 @@ def get_color_from_percentage(base, percentage):
 
 screen = curses.initscr()
 screen.immedok(True)
-screen.border(0)
+# screen.border(0)
 screen.nodelay(1)
 
 init_color()
@@ -137,8 +137,7 @@ def main_screen():
 
         max_text_len = safe_line_width - 12
 
-        box1.border(0)
-        box2.border(0)
+
 
         box1.immedok(True)
         box2.immedok(True)
@@ -253,7 +252,8 @@ def main_screen():
                 draw_progress_bar(
                     box1, position_str, length_str, safe_line_width, palette[0], palette[2]
                 )
-
+            box1.border(0)
+            box2.border(0)
             screen.refresh()
             key = screen.getch()
             if (key == curses.KEY_RESIZE):
