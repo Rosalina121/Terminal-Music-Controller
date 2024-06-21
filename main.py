@@ -18,7 +18,7 @@ import time
 from urllib.request import urlopen
 from colorthief import ColorThief
 import io
-import re
+import sys
 
 
 def init_color():
@@ -32,17 +32,18 @@ def init_color():
     # R = r / .255
 
     curses.start_color()
+    curses.use_default_colors()
 
     # Primary colors
-    curses.init_pair(1, 1, 0)
-    curses.init_pair(2, 2, 0)
-    curses.init_pair(3, 3, 0)
+    curses.init_pair(1, 1, -1)
+    curses.init_pair(2, 2, -1)
+    curses.init_pair(3, 3, -1)
     # Inverted
-    curses.init_pair(4, 0, 1)
-    curses.init_pair(5, 0, 2)
-    curses.init_pair(6, 0, 3)
+    curses.init_pair(4, -1, 1)
+    curses.init_pair(5, -1, 2)
+    curses.init_pair(6, -1, 3)
     # Special pair for player color
-    curses.init_pair(99, 4, 0)
+    curses.init_pair(99, 4, -1)
 
 
 def scroll_string(string):
@@ -53,6 +54,13 @@ def scroll_string(string):
 def get_color_from_percentage(base, percentage):
     return base + int(percentage / 20) % 6
 
+if any(arg in ["-h", "--help"] for arg in sys.argv):
+    print("Usage: python3 ./main.py [options]")
+    print("Options:")
+    print("    -c, --cava       Update cava config with colors from album art")
+    print("                     IMPORTANT NOTE: This currently overwrites your current cava config")
+    print("    -h, --help       Print this help message")
+    sys.exit(0)
 
 # init curses
 screen = curses.initscr()
@@ -217,7 +225,8 @@ def main_screen():
                 palette = set_colors_from_album_art(cover_art_url_url)
                 
                 # cava
-                update_cava_config(palette)
+                if any(arg in ["-c", "--cava"] for arg in sys.argv):
+                    update_cava_config(palette)
 
                 subprocess.run(["/home/rosalina/.local/bin/kitty", "icat", "--clear"])
                 subprocess.run(
