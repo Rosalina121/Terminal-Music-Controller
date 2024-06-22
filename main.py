@@ -13,6 +13,7 @@
 
 
 import curses
+import math
 import subprocess
 import time
 from urllib.request import urlopen
@@ -54,11 +55,14 @@ def scroll_string(string):
 def get_color_from_percentage(base, percentage):
     return base + int(percentage / 20) % 6
 
+
 if any(arg in ["-h", "--help"] for arg in sys.argv):
     print("Usage: python3 ./main.py [options]")
     print("Options:")
     print("    -c, --cava       Update cava config with colors from album art")
-    print("                     IMPORTANT NOTE: This currently overwrites your current cava config")
+    print(
+        "                     IMPORTANT NOTE: This currently overwrites your current cava config"
+    )
     print("    -h, --help       Print this help message")
     sys.exit(0)
 
@@ -122,15 +126,38 @@ def set_colors_from_album_art(cover_art_url_url):
     img = io.BytesIO(fd.read())
     color_thief = ColorThief(img)
 
-    palette = color_thief.get_palette(quality=1, color_count=6)
-    brightest_colors = sorted(palette, key=lambda x: x[0] + x[1] + x[2])[-3:]
+    palette = color_thief.get_palette(
+        quality=1, color_count=2
+    )  # for some reason color_count is 0 indexed? Here returns 3
+
     c = 1
-    for color in brightest_colors:
-        curses.init_color(
-            c, int(color[0] / 0.255), int(color[1] / 0.255), int(color[2] / 0.255)
+    for color in palette:
+        [r, g, b] = color
+        hsp = math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
+        if hsp > 127.5:
+            curses.init_color(
+                c, int(color[0] / 0.255), int(color[1] / 0.255), int(color[2] / 0.255)
         )
+        else:
+            factor = 3.5
+             # Normalize the RGB values to the range [0, 1]
+            normalized_rgb = [component / 255.0 for component in color]
+            
+            # Increase the brightness by multiplying by the factor
+            brighter_rgb = [component * factor for component in normalized_rgb]
+            
+            # Clip the values to the range [0, 1]
+            clipped_rgb = [min(1.0, component) for component in brighter_rgb]
+            
+            # Denormalize the values back to the range [0, 255]
+            final_rgb = [int(component * 255) for component in clipped_rgb]
+
+            curses.init_color(
+                c, int(final_rgb[0] / 0.255), int(final_rgb[1] / 0.255), int(final_rgb[2] / 0.255))
+
+
         c += 1
-    return brightest_colors
+    return palette
 
 
 def update_cava_config(palette):
@@ -223,7 +250,7 @@ def main_screen():
                 )
                 cover_art_url_url = cover_art_url.stdout[:-1].decode("utf-8")
                 palette = set_colors_from_album_art(cover_art_url_url)
-                
+
                 # cava
                 if any(arg in ["-c", "--cava"] for arg in sys.argv):
                     update_cava_config(palette)
