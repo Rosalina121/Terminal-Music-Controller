@@ -61,8 +61,9 @@ if any(arg in ["-h", "--help"] for arg in sys.argv):
     print("Options:")
     print("    -c, --cava       Update cava config with colors from album art")
     print(
-        "                     IMPORTANT NOTE: This currently overwrites your current cava config"
+        '                     Be cure to point cava to "cava-config" configuration file'
     )
+    print('                     i.e. "cava -p cava-config"')
     print("    -h, --help       Print this help message")
     sys.exit(0)
 
@@ -137,31 +138,34 @@ def set_colors_from_album_art(cover_art_url_url):
         if hsp > 127.5:
             curses.init_color(
                 c, int(color[0] / 0.255), int(color[1] / 0.255), int(color[2] / 0.255)
-        )
+            )
         else:
             factor = 3.5
-             # Normalize the RGB values to the range [0, 1]
+            # Normalize the RGB values to the range [0, 1]
             normalized_rgb = [component / 255.0 for component in color]
-            
+
             # Increase the brightness by multiplying by the factor
             brighter_rgb = [component * factor for component in normalized_rgb]
-            
+
             # Clip the values to the range [0, 1]
             clipped_rgb = [min(1.0, component) for component in brighter_rgb]
-            
+
             # Denormalize the values back to the range [0, 255]
             final_rgb = [int(component * 255) for component in clipped_rgb]
 
             curses.init_color(
-                c, int(final_rgb[0] / 0.255), int(final_rgb[1] / 0.255), int(final_rgb[2] / 0.255))
-
+                c,
+                int(final_rgb[0] / 0.255),
+                int(final_rgb[1] / 0.255),
+                int(final_rgb[2] / 0.255),
+            )
 
         c += 1
     return palette
 
 
 def update_cava_config(palette):
-    f = open("/home/rosalina/.config/cava/config", "w")
+    f = open("cava-config", "w+")
     f.write(
         """
 [color]

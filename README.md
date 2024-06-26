@@ -20,8 +20,7 @@ Install reqs and just run:
 python3 main.py
 ```
 Add `-h`/`--help` for options.
-Use `-c`/`--cava` to colorize `cava` with colors from the current album art.
-**NOTE**: Above will overwrite your current `cava` config. Non-destructive config adapt is in works.
+Use `-c`/`--cava` to colorize `cava` with colors from the current album art. Be sure to point cava to `cava-config` configuration file.
 
 ## Features
 - scrollable text if longer than window
@@ -33,8 +32,6 @@ Use `-c`/`--cava` to colorize `cava` with colors from the current album art.
 - *almost* detects current player
   - Cider and VLC are coded, others WIP
 - Updates `cava` colors
-  - Be sure to comment it out if not using
-  - ⚠️ It **WILL** overwrite your current config! ⚠️
 ## Known issues
 - Will crash on start with `ValueError: invalid literal for int() with base 10: ''`
   - This is happening when more players are active and `playerctl` gets metadata from the wrong one.
