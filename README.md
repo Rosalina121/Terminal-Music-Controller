@@ -1,6 +1,6 @@
 # Terminal-Music-Controller
 
-~~Control~~ Monitor your music from the terminal, with curses!
+Monitor *and* control your music from the terminal, with curses!
 ![Example view](example.png)
 ![Example view](example2.png)
 ![Example view](example3.png)
