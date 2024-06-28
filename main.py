@@ -14,12 +14,17 @@
 
 import curses
 import math
+
 import subprocess
 import time
-from urllib.request import urlopen
-from colorthief import ColorThief
 import io
 import sys
+
+from urllib.request import urlopen
+from colorthief import ColorThief
+from wcwidth import wcswidth
+
+
 
 
 def init_color():
@@ -48,8 +53,11 @@ def init_color():
 
 
 def scroll_string(string):
-    new_string = string[1:] + string[0]
-    return new_string
+    # if wcswidth(string[0]) < 2:  
+        new_string = string[1:] + string[0]
+        return new_string
+    # else:
+    #     return string
 
 
 def get_color_from_percentage(base, percentage):
@@ -202,6 +210,12 @@ def main_screen():
             box2 = curses.newwin(lines, half_cols, 0, half_cols)
             safe_line_width = half_cols
 
+        # metdata
+        old_title = ""
+        old_title_scrolled = ""
+        old_album_scrolled = ""
+        old_artist_scrolled = ""
+
         max_text_len = safe_line_width - 12
 
         box1.immedok(True)
@@ -232,11 +246,7 @@ def main_screen():
         else:
             image_size_and_pos = f"{half_cols-2}x{half_cols-2}@{half_cols+1}x1"
 
-        # metdata
-        old_title = ""
-        old_title_scrolled = ""
-        old_album_scrolled = ""
-        old_artist_scrolled = ""
+
 
         # palette
         palette = []
@@ -301,14 +311,23 @@ def main_screen():
             if status.stdout[:-1].decode("utf-8") == "Playing":
                 box1.addstr(7, 3, "ause", curses.color_pair(2))
 
-                if len(old_title_scrolled) > max_text_len:
+                if wcswidth(old_title_scrolled) > max_text_len:
                     old_title_scrolled = scroll_string(old_title_scrolled)
-                if len(old_album_scrolled) > max_text_len:
+                if wcswidth(old_album_scrolled) > max_text_len:
                     old_album_scrolled = scroll_string(old_album_scrolled)
-                if len(old_artist_scrolled) > max_text_len:
+                if wcswidth(old_artist_scrolled) > max_text_len:
                     old_artist_scrolled = scroll_string(old_artist_scrolled)
             else:
                 box1.addstr(7, 3, "lay ", curses.color_pair(2))
+
+            wc_title_offset = wcswidth(old_title_scrolled) - len(old_title_scrolled)
+            wc_album_offset = wcswidth(old_album_scrolled) - len(old_album_scrolled)
+            wc_artist_offset = wcswidth(old_artist_scrolled) -len(old_artist_scrolled)
+
+            # debug offsets for wide characters
+            # box1.addstr(9, 5, "wctitleoffset: " + str(wc_title_offset), curses.A_NORMAL)
+            # box1.addstr(10, 5, "wcalbumoffset: " + str(wc_album_offset), curses.A_NORMAL)
+            # box1.addstr(11, 5, "wcartistoffset: " + str(wc_artist_offset), curses.A_NORMAL)
 
             position = subprocess.run(
                 'playerctl position --format "{{ duration(position) }}"',
@@ -323,13 +342,13 @@ def main_screen():
             box1.addstr(3, 2, " " * (safe_line_width - 4), curses.A_NORMAL)
 
             box1.addnstr(1, 2, "Title:  ", max_text_len, curses.color_pair(2))
-            box1.addnstr(1, 10, old_title_scrolled, max_text_len)
+            box1.addnstr(1, 10, old_title_scrolled, max_text_len - wc_title_offset)
 
             box1.addnstr(2, 2, "Album:  ", max_text_len, curses.color_pair(2))
-            box1.addnstr(2, 10, old_album_scrolled, max_text_len)
+            box1.addnstr(2, 10, old_album_scrolled, max_text_len - wc_album_offset)
 
             box1.addnstr(3, 2, "Artist: ", max_text_len, curses.color_pair(2))
-            box1.addnstr(3, 10, old_artist_scrolled, max_text_len)
+            box1.addnstr(3, 10, old_artist_scrolled, max_text_len - wc_artist_offset)
 
             if palette:
                 draw_progress_bar(
@@ -382,5 +401,21 @@ def main_screen():
     finally:
         curses.endwin()
 
-
+# uncomment for shitty error handling
+# try:
 main_screen()
+# except:
+#     # lol no
+#     curses.endwin()
+#     screen = curses.initscr()
+#     screen.immedok(True)
+#     screen.nodelay(1)
+#     screen.keypad(1)
+
+#     curses.mousemask(curses.ALL_MOUSE_EVENTS | curses.REPORT_MOUSE_POSITION)
+#     curses.flushinp()
+#     curses.noecho()
+#     curses.curs_set(0)
+
+#     init_color()
+#     main_screen()
